@@ -26,7 +26,7 @@ public class BeemanMethod implements OdeMethod{
         this.currentAcceleration = force.apply(currentPosition, currentVelocity) / mass;
         this.previousAcceleration = force.apply(previousPosition, previousVelocity) / mass;
 
-        double nextPosition = currentPosition + currentVelocity
+        double nextPosition = currentPosition + currentVelocity * stepSize
                 + (2.0 / 3.0) * currentAcceleration * stepSize * stepSize
                 - (1.0 / 6.0) * previousAcceleration * stepSize * stepSize;
 
@@ -39,7 +39,7 @@ public class BeemanMethod implements OdeMethod{
     private double getNextPredictedVelocity(double stepSize) {
         return currentVelocity
                 + (3.0 / 2.0) * stepSize * currentAcceleration
-                - 0.5 * stepSize * previousAcceleration / mass;
+                - 0.5 * stepSize * previousAcceleration;
     }
 
     private double getNextCorrectedVelocity(double stepSize) {
