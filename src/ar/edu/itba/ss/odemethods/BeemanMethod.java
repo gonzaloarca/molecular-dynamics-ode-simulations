@@ -2,7 +2,7 @@ package ar.edu.itba.ss.odemethods;
 
 import java.util.function.BiFunction;
 
-public class BeemanMethod {
+public class BeemanMethod implements OdeMethod{
 
     private double currentPosition;
     private double currentVelocity;
@@ -12,28 +12,23 @@ public class BeemanMethod {
     private double previousAcceleration;
     private BiFunction<Double, Double, Double> force;
     private double mass;
-    private double timeStep;
 
-    public BeemanMethod(double r0, double r1, double v0, double v1, BiFunction<Double, Double, Double> force, double mass, double timeStep) {
-        // TODO: r0, v0? (para aceleracion en t - delta t)
-        this.currentPosition = r1;
-        this.currentVelocity = v1;
-        this.previousPosition = r0;
-        this.previousVelocity = v0;
+    public BeemanMethod(double r0, double v0, BiFunction<Double, Double, Double> force, double mass) {
+        this.currentPosition = r0;
+        this.currentVelocity = v0;
+
         this.force = force;
         this.mass = mass;
-        this.timeStep = timeStep;
     }
 
-    public double getNextPosition() {
-
+    private double getNextPosition(double stepSize) {
         // guardar a(t) y a(t-delta)
         this.currentAcceleration = force.apply(currentPosition, currentVelocity) / mass;
         this.previousAcceleration = force.apply(previousPosition, previousVelocity) / mass;
 
         double nextPosition = currentPosition + currentVelocity
-                + (2.0 / 3.0) * currentAcceleration * timeStep * timeStep
-                - (1.0 / 6.0) * previousAcceleration * timeStep * timeStep;
+                + (2.0 / 3.0) * currentAcceleration * stepSize * stepSize
+                - (1.0 / 6.0) * previousAcceleration * stepSize * stepSize;
 
         this.previousPosition = this.currentPosition;
         this.currentPosition = nextPosition;
@@ -41,25 +36,46 @@ public class BeemanMethod {
         return nextPosition;
     }
 
-    private double getNextPredictedVelocity() {
+    private double getNextPredictedVelocity(double stepSize) {
         return currentVelocity
-                + (3.0 / 2.0) * timeStep * currentAcceleration
-                - 0.5 * timeStep * previousAcceleration / mass;
+                + (3.0 / 2.0) * stepSize * currentAcceleration
+                - 0.5 * stepSize * previousAcceleration / mass;
     }
 
-    private double getNextCorrectedVelocity() {
-        double nextPredictedVelocity = getNextPredictedVelocity();
+    private double getNextCorrectedVelocity(double stepSize) {
+        double nextPredictedVelocity = getNextPredictedVelocity(stepSize);
         double nextAcceleration = force.apply(currentPosition, nextPredictedVelocity);
 
-        return currentVelocity + (1.0 / 3.0) * nextAcceleration * timeStep
-                + (5.0 / 6.0) * currentAcceleration * timeStep
-                - (1.0 / 6.0) * previousAcceleration * timeStep;
+        return currentVelocity + (1.0 / 3.0) * nextAcceleration * stepSize
+                + (5.0 / 6.0) * currentAcceleration * stepSize
+                - (1.0 / 6.0) * previousAcceleration * stepSize;
     }
 
-    public double getNextVelocity() {
+    private double getNextVelocity(double stepSize) {
         this.previousVelocity = this.currentVelocity;
-        this.currentVelocity = getNextCorrectedVelocity();
+        this.currentVelocity = getNextCorrectedVelocity(stepSize);
 
         return this.currentVelocity;
+    }
+
+    @Override
+    public double[] solve(int steps, double stepSize) {
+        // use euler to calculate previous position and velocity
+        EulerMethod euler = new EulerMethod(currentPosition, currentVelocity, force, mass);
+        this.previousPosition = euler.getNextPosition(stepSize);
+        this.previousVelocity = euler.getNextVelocity(stepSize);
+
+        euler.update(this.previousPosition, this.previousVelocity);
+
+        double[] positions = new double[steps];
+
+        positions[0] = this.currentPosition;
+
+        for (int i = 1; i < steps; i++) {
+            positions[i] = getNextPosition(stepSize);
+            getNextVelocity(stepSize);
+        }
+
+        return positions;
     }
 }

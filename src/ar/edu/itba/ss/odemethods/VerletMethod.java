@@ -2,43 +2,26 @@ package ar.edu.itba.ss.odemethods;
 
 import java.util.function.BiFunction;
 
-public class VerletMethod {
-    private final double initialPosition;
-    private final double initialVelocity;
+public class VerletMethod implements OdeMethod{
     private final BiFunction<Double, Double, Double> force;
-    private final double timeStep;
     private final double mass;
+    private double previousPreviousPosition;
     private double previousPosition;
     private double currentPosition;
+    private double previousVelocity;
     private double currentVelocity;
-    private double previousPreviousPosition;
-    private double currentTimeStep;
 
-    public VerletMethod(double r0, double r1, double v0, BiFunction<Double, Double, Double> force, double mass, double timeStep) {
-        // TODO: r0? para r(t - delta t)
-        this.initialPosition = r1;
-        this.initialVelocity = v0;
+    public VerletMethod(double r0, double v0, BiFunction<Double, Double, Double> force, double mass) {
         this.force = force;
-        this.timeStep = timeStep;
         this.mass = mass;
-        this.currentTimeStep = 0;
-        this.currentPosition = r1;
+        this.currentPosition = r0;
         this.currentVelocity = v0;
-        this.previousPosition = r0;
+        this.previousVelocity = v0;
     }
 
-    // r0 = 1
-    // nextPosition() -> r1 = r(0 + dt) = 2 * r0 - r(-1) + dt^2 * force(r0,v0)
-    // nextPosition() -> r2 = f(r0, v0) --> r(t + dt)
-    // nextVelocity() -> v1 = (r2 - r0)/2*delta --> v(t)
-    // nextPosition() -> f(r1, v1)
-    // nextVelocity() -> v2 = (r1 - r(-1)) / 2 * delta
-    // nextPosition() -> f(r2, v2)
-    // nextVelocity() -> v = (r2 - r0) / 2 * delta
-
-    private double getNextPosition() {
-        double nextPosition = 2 * this.currentPosition - this.previousPosition +
-                force.apply(this.currentPosition, this.currentVelocity) * this.timeStep * this.timeStep / (this.mass);
+    private double getNextPosition(double stepSize) {
+        double nextPosition = 2 * currentPosition - previousPosition +
+                force.apply(currentPosition, previousVelocity) * stepSize * stepSize / (mass);
 
         this.previousPreviousPosition = this.previousPosition;
         this.previousPosition = this.currentPosition;
@@ -47,13 +30,32 @@ public class VerletMethod {
         return nextPosition;
     }
 
-    public double getNextVelocity() {
-        double nextVelocity = (this.currentPosition - this.previousPreviousPosition) / (2 * this.timeStep);
+    private double getNextVelocity(double stepSize) {
+        double nextVelocity = (currentPosition - previousPreviousPosition) / (2 * stepSize);
+
+        this.previousVelocity = this.currentVelocity;
         this.currentVelocity = nextVelocity;
+
         return nextVelocity;
     }
 
-    public void nextTimeStep() {
-        this.currentTimeStep += this.timeStep;
+    public double[] solve(int steps, double stepSize) {
+        // use Euler's method as an approximation to get r(-dt)
+        EulerMethod euler = new EulerMethod(currentPosition, currentVelocity, force, mass);
+        this.previousPosition = euler.getNextPosition(stepSize);
+
+        euler.update(this.previousPosition, euler.getNextVelocity(stepSize));
+
+        double[] positions = new double[steps];
+
+        positions[0] = this.currentPosition;
+
+        for (int i = 1; i < steps; i++) {
+            positions[i] = getNextPosition(stepSize);
+            getNextVelocity(stepSize);
+        }
+
+        return positions;
     }
+
 }

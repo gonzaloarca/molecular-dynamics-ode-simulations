@@ -1,0 +1,82 @@
+package ar.edu.itba.ss.moleculardynamics.dampedharmonicoscillator;
+
+import ar.edu.itba.ss.odemethods.*;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+
+public class Simulation {
+    private final List<OdeMethod> methods;
+
+    public Simulation(double r0, double v0, double k, double gamma, double mass) {
+        BiFunction<Double, Double, Double> force = (r, v) -> -k * r - gamma * v;
+        methods = new ArrayList<>();
+        methods.add(new DampedHarmonicOscillatorAnalyticMethod(r0, v0, mass, k, gamma));
+        methods.add(new VerletMethod(r0, v0, force, mass));
+        methods.add(new BeemanMethod(r0, v0, force, mass));
+        methods.add(new GearPredictorCorrector(r0, v0, force, mass));
+
+    }
+
+    public static void main(String[] args) throws IOException {
+
+        String outputFileName = System.getProperty("outputFileName", "output.csv");
+        int steps = Integer.parseInt(System.getProperty("steps", "100000"));
+        double stepSize = Double.parseDouble(System.getProperty("stepSize", "0.001"));
+        int saveFrequency = Integer.parseInt(System.getProperty("saveFrequency", "10"));
+
+        double r0 = 1;
+        double gamma = 100;
+        double k = 10000;
+        double mass = 70;
+        double v0 = -0.5 * r0 * gamma / mass;
+        Simulation simulation = new Simulation(r0, v0, k, gamma, mass);
+
+        List<double[]> results = simulation.simulate(steps, stepSize);
+
+        printResults(results, saveFrequency, outputFileName);
+    }
+
+    public List<double[]> simulate(int steps, double stepSize) {
+
+        final List<double[]> results = new ArrayList<>();
+
+        for (OdeMethod method : this.methods) {
+            results.add(method.solve(steps, stepSize));
+        }
+
+        return results;
+    }
+
+    public static void printResults(List<double[]> results, int saveFrequency, String fileName) throws IOException {
+
+        int steps = results.get(0).length;
+
+        PrintWriter printWriter = new PrintWriter(new FileWriter(fileName));
+
+        printWriter.print("Analytic;Verlet;Beeman;Gear\n");
+
+        final List<String> currentOutput = new ArrayList<>();
+
+        for (int currentStep = 0; currentStep < steps; currentStep++) {
+            if (currentStep % saveFrequency == 0) {
+
+                currentOutput.clear();
+
+                for (double[] result : results) {
+                    currentOutput.add(Double.toString(result[currentStep]));
+                }
+
+                String output = String.join(";", currentOutput);
+                printWriter.print(output + "\n");
+
+            }
+        }
+
+        printWriter.close();
+    }
+}
