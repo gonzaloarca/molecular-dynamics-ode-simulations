@@ -62,74 +62,72 @@ public class GearPredictorCorrector implements OdeMethod {
         return currentR5;
     }
 
-    private double getRCorrected(double stepSize) {
-        double deltaAcc = force.apply(getRPredicted(stepSize), getR1Predicted(stepSize)) / mass - getR2Predicted(stepSize);
-        double deltaR2 = deltaAcc * stepSize * stepSize / 2.0;
+    private double getRCorrected(double stepSize, double deltaR2, double rPredicted) {
 
         double alpha0 = 3.0 / 16.0;
-        this.currentR = getRPredicted(stepSize) + alpha0 * deltaR2;
+        this.currentR = rPredicted + alpha0 * deltaR2;
 
         return this.currentR;
     }
 
-    private double getR1Corrected(double stepSize) {
-        double deltaAcc = force.apply(getRPredicted(stepSize), getR1Predicted(stepSize)) / mass - getR2Predicted(stepSize);
-        double deltaR2 = deltaAcc * stepSize * stepSize / 2.0;
+    private double getR1Corrected(double stepSize, double deltaR2, double r1Predicted) {
 
         double alpha1 = 251.0 / 360.0;
-        this.currentR1 = getR1Predicted(stepSize) + alpha1 * deltaR2 * (1.0 / stepSize);
+        this.currentR1 = r1Predicted + alpha1 * deltaR2 * (1.0 / stepSize);
 
         return this.currentR1;
     }
 
-    private double getR2Corrected(double stepSize) {
-        double deltaAcc = force.apply(getRPredicted(stepSize), getR1Predicted(stepSize)) / mass - getR2Predicted(stepSize);
-        double deltaR2 = deltaAcc * stepSize * stepSize / 2.0;
+    private double getR2Corrected(double stepSize, double deltaR2, double r2Predicted) {
 
         double alpha2 = 1.0;
-        this.currentR2 = getR2Predicted(stepSize) + alpha2 * deltaR2 * (2.0 / stepSize * stepSize);
+        this.currentR2 = r2Predicted + alpha2 * deltaR2 * (2.0 / stepSize * stepSize);
 
         return this.currentR2;
     }
 
-    private double getR3Corrected(double stepSize) {
-        double deltaAcc = force.apply(getRPredicted(stepSize), getR1Predicted(stepSize)) / mass - getR2Predicted(stepSize);
-        double deltaR2 = deltaAcc * stepSize * stepSize / 2.0;
+    private double getR3Corrected(double stepSize, double deltaR2, double r3Predicted) {
 
         double alpha3 = 11.0 / 18.0;
-        this.currentR3 = getR3Predicted(stepSize) + alpha3 * deltaR2 * (6.0 / stepSize * stepSize * stepSize);
+        this.currentR3 = r3Predicted + alpha3 * deltaR2 * (6.0 / stepSize * stepSize * stepSize);
 
         return this.currentR3;
     }
 
-    private double getR4Corrected(double stepSize) {
-        double deltaAcc = force.apply(getRPredicted(stepSize), getR1Predicted(stepSize)) / mass - getR2Predicted(stepSize);
-        double deltaR2 = deltaAcc * stepSize * stepSize / 2.0;
+    private double getR4Corrected(double stepSize, double deltaR2, double r4Predicted) {
 
         double alpha4 = 1.0 / 6.0;
-        this.currentR4 = getR4Predicted(stepSize) + alpha4 * deltaR2 * (24.0 / stepSize * stepSize * stepSize * stepSize);
+        this.currentR4 = r4Predicted + alpha4 * deltaR2 * (24.0 / stepSize * stepSize * stepSize * stepSize);
 
         return this.currentR4;
     }
 
-    private double getR5Corrected(double stepSize) {
-        double deltaAcc = force.apply(getRPredicted(stepSize), getR1Predicted(stepSize)) / mass - getR2Predicted(stepSize);
-        double deltaR2 = deltaAcc * stepSize * stepSize / 2.0;
+    private double getR5Corrected(double stepSize, double deltaR2, double r5Predicted) {
 
         double alpha5 = 1.0 / 60.0;
-        this.currentR5 = getR5Predicted(stepSize) + alpha5 * deltaR2 * (120.0 / stepSize * stepSize * stepSize * stepSize * stepSize);
+        this.currentR5 = r5Predicted + alpha5 * deltaR2 * (120.0 / stepSize * stepSize * stepSize * stepSize * stepSize);
 
         return this.currentR5;
     }
 
     private double getNextPosition(double stepSize) {
-        getR1Corrected(stepSize);
-        getR2Corrected(stepSize);
-        getR3Corrected(stepSize);
-        getR4Corrected(stepSize);
-        getR5Corrected(stepSize);
+        double deltaAcc = force.apply(getRPredicted(stepSize), getR1Predicted(stepSize)) / mass - getR2Predicted(stepSize);
+        double deltaR2 = deltaAcc * stepSize * stepSize / 2.0;
 
-        return getRCorrected(stepSize);
+        double r5Predicted = getR5Predicted(stepSize);
+        double r4Predicted = getR4Predicted(stepSize);
+        double r3Predicted = getR3Predicted(stepSize);
+        double r2Predicted = getR2Predicted(stepSize);
+        double r1Predicted = getR1Predicted(stepSize);
+        double rPredicted = getRPredicted(stepSize);
+
+        getR5Corrected(stepSize, deltaR2, r5Predicted);
+        getR4Corrected(stepSize, deltaR2, r4Predicted);
+        getR3Corrected(stepSize, deltaR2, r3Predicted);
+        getR2Corrected(stepSize, deltaR2, r2Predicted);
+        getR1Corrected(stepSize, deltaR2, r1Predicted);
+
+        return getRCorrected(stepSize, deltaR2, rPredicted);
     }
 
     @Override
@@ -138,7 +136,7 @@ public class GearPredictorCorrector implements OdeMethod {
 
         positions[0] = this.currentR;
 
-        for(int step = 1; step < steps; step++) {
+        for (int step = 1; step < steps; step++) {
             positions[step] = getNextPosition(stepSize);
         }
 
