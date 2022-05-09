@@ -26,4 +26,4 @@ if __name__ == '__main__':
                 for index, method in enumerate(methods):
                     results[index].append(float(output[index]))
 
-    plot_methods(5, 10000, results, methods)
+    plot_methods(5, 500, results, methods)

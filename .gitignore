@@ -46,3 +46,6 @@ __pycache__/
 *.py[cod]
 *.pyc
 *.cpython-39.pyc
+
+# csv files
+*.csv

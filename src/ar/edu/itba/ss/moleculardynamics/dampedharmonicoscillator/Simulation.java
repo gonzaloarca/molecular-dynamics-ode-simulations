@@ -14,18 +14,25 @@ public class Simulation {
 
     public Simulation(double r0, double v0, double k, double gamma, double mass) {
         BiFunction<Double, Double, Double> force = (r, v) -> -k * r - gamma * v;
+
         methods = new ArrayList<>();
         methods.add(new DampedHarmonicOscillatorAnalyticMethod(r0, v0, mass, k, gamma));
         methods.add(new VerletMethod(r0, v0, force, mass));
         methods.add(new BeemanMethod(r0, v0, force, mass));
-        methods.add(new GearPredictorCorrector(r0, v0, force, mass));
+
+        double initialR2 = force.apply(r0, v0) / mass;
+        double initialR3 = (-k * v0 - gamma * initialR2) / mass;
+        double initialR4 = (-k * initialR2 - gamma * initialR3) / mass;
+        double initialR5 = (-k * initialR3 - gamma * initialR4) / mass;
+
+        methods.add(new GearPredictorCorrector(r0, v0, initialR3, initialR4, initialR5, force, mass));
 
     }
 
     public static void main(String[] args) throws IOException {
 
         String outputFileName = System.getProperty("outputFileName", "output.csv");
-        int steps = Integer.parseInt(System.getProperty("steps", "100000"));
+        int steps = Integer.parseInt(System.getProperty("steps", "5000"));
         double stepSize = Double.parseDouble(System.getProperty("stepSize", "0.001"));
         int saveFrequency = Integer.parseInt(System.getProperty("saveFrequency", "10"));
 

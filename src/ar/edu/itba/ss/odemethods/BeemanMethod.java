@@ -2,7 +2,7 @@ package ar.edu.itba.ss.odemethods;
 
 import java.util.function.BiFunction;
 
-public class BeemanMethod implements OdeMethod{
+public class BeemanMethod implements OdeMethod {
 
     private double currentPosition;
     private double currentVelocity;
