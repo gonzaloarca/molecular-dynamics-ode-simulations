@@ -34,7 +34,6 @@ public class Simulation {
         String outputFileName = System.getProperty("outputFileName", "output.csv");
         int steps = Integer.parseInt(System.getProperty("steps", "5000"));
         double stepSize = Double.parseDouble(System.getProperty("stepSize", "0.001"));
-        int saveFrequency = Integer.parseInt(System.getProperty("saveFrequency", "10"));
 
         double r0 = 1;
         double gamma = 100;
@@ -45,7 +44,7 @@ public class Simulation {
 
         List<double[]> results = simulation.simulate(steps, stepSize);
 
-        printResults(results, saveFrequency, outputFileName);
+        printResults(results, 1, outputFileName);
     }
 
     public List<double[]> simulate(int steps, double stepSize) {
