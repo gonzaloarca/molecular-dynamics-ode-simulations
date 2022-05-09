@@ -85,4 +85,8 @@ public class Simulation {
 
         printWriter.close();
     }
+
+    public static void printErrors(List<double[]> results, int saveFrequency, String fileName) throws IOException {
+
+    }
 }
