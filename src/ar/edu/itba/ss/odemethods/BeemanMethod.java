@@ -44,7 +44,7 @@ public class BeemanMethod implements OdeMethod{
 
     private double getNextCorrectedVelocity(double stepSize) {
         double nextPredictedVelocity = getNextPredictedVelocity(stepSize);
-        double nextAcceleration = force.apply(currentPosition, nextPredictedVelocity);
+        double nextAcceleration = force.apply(currentPosition, nextPredictedVelocity) / mass;
 
         return currentVelocity + (1.0 / 3.0) * nextAcceleration * stepSize
                 + (5.0 / 6.0) * currentAcceleration * stepSize
@@ -62,8 +62,8 @@ public class BeemanMethod implements OdeMethod{
     public double[] solve(int steps, double stepSize) {
         // use euler to calculate previous position and velocity
         EulerMethod euler = new EulerMethod(currentPosition, currentVelocity, force, mass);
-        this.previousPosition = euler.getNextPosition(stepSize);
-        this.previousVelocity = euler.getNextVelocity(stepSize);
+        this.previousPosition = euler.getNextPosition(-stepSize);
+        this.previousVelocity = euler.getNextVelocity(-stepSize);
 
         euler.update(this.previousPosition, this.previousVelocity);
 

@@ -42,9 +42,9 @@ public class VerletMethod implements OdeMethod{
     public double[] solve(int steps, double stepSize) {
         // use Euler's method as an approximation to get r(-dt)
         EulerMethod euler = new EulerMethod(currentPosition, currentVelocity, force, mass);
-        this.previousPosition = euler.getNextPosition(stepSize);
+        this.previousPosition = euler.getNextPosition(-stepSize);
 
-        euler.update(this.previousPosition, euler.getNextVelocity(stepSize));
+        euler.update(this.previousPosition, euler.getNextVelocity(-stepSize));
 
         double[] positions = new double[steps];
 
