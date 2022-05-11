@@ -164,7 +164,7 @@ public class Simulation {
     public static void printStaticData(double distanceBetweenParticles, int particlesPerRow, double boxHeight, double boxLength, double initialHeight, double initialSpeed, double mass, double charge, double stepSize, int saveFrequency) throws IOException {
         PrintWriter printWriter = new PrintWriter(new FileWriter(STATIC_FILE_NAME));
 
-        printWriter.printf("%f\n%d\n%f %f\n%f\n%f\n%f\n%f\n%f\n%d\n", distanceBetweenParticles, particlesPerRow, boxHeight, boxLength, initialHeight, initialSpeed, mass, charge, stepSize, saveFrequency);
+        printWriter.printf("%6.3e\n%d\n%6.3e %6.3e\n%6.3e\n%6.3e\n%6.3e\n%6.3e\n%6.3e\n%d\n", distanceBetweenParticles, particlesPerRow, boxHeight, boxLength, initialHeight, initialSpeed, mass, charge, stepSize, saveFrequency);
 
         printWriter.close();
     }
