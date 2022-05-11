@@ -19,7 +19,8 @@ public class VerletMethod implements OdeMethod{
         this.previousVelocity = v0;
     }
 
-    private double getNextPosition(double stepSize) {
+    @Override
+    public double getNextPosition(double stepSize) {
         double nextPosition = 2 * currentPosition - previousPosition +
                 force.apply(currentPosition, previousVelocity) * stepSize * stepSize / (mass);
 
@@ -30,7 +31,8 @@ public class VerletMethod implements OdeMethod{
         return nextPosition;
     }
 
-    private double getNextVelocity(double stepSize) {
+    @Override
+    public double getNextVelocity(double stepSize) {
         double nextVelocity = (currentPosition - previousPreviousPosition) / (2 * stepSize);
 
         this.previousVelocity = this.currentVelocity;

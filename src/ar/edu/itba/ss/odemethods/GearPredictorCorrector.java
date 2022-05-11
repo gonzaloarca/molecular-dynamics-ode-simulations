@@ -99,6 +99,7 @@ public class GearPredictorCorrector implements OdeMethod {
         return r5Predicted + alpha5 * deltaR2 * (120.0 / (stepSize * stepSize * stepSize * stepSize * stepSize));
     }
 
+    @Override
     public double getNextPosition(double stepSize) {
         double r5Predicted = getR5Predicted(stepSize);
         double r4Predicted = getR4Predicted(stepSize);
@@ -127,6 +128,7 @@ public class GearPredictorCorrector implements OdeMethod {
         return rCorrected;
     }
 
+    @Override
     public double getNextVelocity(double stepSize) {
         return currentR1;
     }

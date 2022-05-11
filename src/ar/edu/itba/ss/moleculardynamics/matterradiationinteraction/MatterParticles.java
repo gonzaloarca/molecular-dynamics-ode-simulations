@@ -1,13 +1,14 @@
 package ar.edu.itba.ss.moleculardynamics.matterradiationinteraction;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 
-public class MatterParticles {
+public class MatterParticles implements Iterable<Particle> {
     private final Particle[][] matrix;
     private final double distanceBetweenParticles;
+    private final int particlesPerRow;
 
     public MatterParticles(int particlesPerRow, double distanceBetweenParticles, double charge, double mass) {
+        this.particlesPerRow = particlesPerRow;
         this.matrix = new Particle[particlesPerRow][particlesPerRow];
         this.distanceBetweenParticles = distanceBetweenParticles;
 
@@ -54,5 +55,41 @@ public class MatterParticles {
         }
 
         return totalPotentialEnergy;
+    }
+
+    public Iterator<Particle> iterator() {
+        return new MatterParticlesIterator(matrix, particlesPerRow);
+    }
+
+    private class MatterParticlesIterator implements Iterator<Particle> {
+
+        private int row;
+        private int column;
+        private int particlesPerRow;
+        private Particle[][] matrix;
+
+        MatterParticlesIterator(Particle[][] matterParticles, int particlesPerRow) {
+            this.matrix = matterParticles;
+            this.row = 0;
+            this.column = 0;
+            this.particlesPerRow = particlesPerRow;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return row < particlesPerRow && column < particlesPerRow;
+        }
+
+        @Override
+        public Particle next() {
+            Particle particle = matrix[row][column];
+            if (column == particlesPerRow - 1) {
+                row++;
+                column = 0;
+            } else {
+                column++;
+            }
+            return particle;
+        }
     }
 }

@@ -7,8 +7,8 @@ public class Particle {
     private final double charge;
 
     public Particle(double x, double y, double vx, double vy, double mass, double charge) {
-        this.position = new Vector2D(x,y);
-        this.velocity = new Vector2D(vx,vy);
+        this.position = new Vector2D(x, y);
+        this.velocity = new Vector2D(vx, vy);
         this.mass = mass;
         this.charge = charge;
     }
@@ -46,4 +46,15 @@ public class Particle {
         return this.mass;
     }
 
+    public double getCharge() {
+        return this.charge;
+    }
+
+    public void setPosition(Vector2D position) {
+        this.position = position;
+    }
+
+    public void setVelocity(Vector2D velocity) {
+        this.velocity = velocity;
+    }
 }

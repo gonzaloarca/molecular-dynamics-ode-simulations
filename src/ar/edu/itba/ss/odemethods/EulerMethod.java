@@ -17,6 +17,7 @@ public class EulerMethod implements OdeMethod {
         this.mass = mass;
     }
 
+    @Override
     public double getNextPosition(double stepSize) {
         double nextPosition = currentPosition
                 + stepSize * currentVelocity
@@ -27,6 +28,7 @@ public class EulerMethod implements OdeMethod {
         return nextPosition;
     }
 
+    @Override
     public double getNextVelocity(double stepSize) {
         double nextVelocity = currentVelocity + stepSize * force.apply(currentPosition, currentVelocity) / mass;
 

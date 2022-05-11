@@ -39,4 +39,14 @@ public class DampedHarmonicOscillatorAnalyticMethod implements OdeMethod{
         return positions;
     }
 
+    @Override
+    public double getNextVelocity(double stepSize) {
+        return 0;
+    }
+
+    @Override
+    public double getNextPosition(double stepSize) {
+        return 0;
+    }
+
 }
