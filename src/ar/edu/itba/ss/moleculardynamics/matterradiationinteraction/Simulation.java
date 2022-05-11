@@ -6,17 +6,18 @@ import ar.edu.itba.ss.odemethods.OdeMethod;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Simulation {
+    private final static String STATIC_FILE_NAME = "static.txt";
+    private final static String DYNAMIC_FILE_NAME = "dynamic.txt";
+    private final static String MATTER_FILE_NAME = "matter.txt";
     private final MatterParticles matterParticles;
     private final Particle radiationParticle;
     private final double distanceBetweenParticles;
-    private final double boxLength;
+    private final double boxWidth;
     private final double boxHeight;
     private final double initialHeight;
     private final double initialSpeed;
@@ -24,15 +25,11 @@ public class Simulation {
     private final double charge;
     private final int particlesPerRow;
 
-    private final static String STATIC_FILE_NAME = "static.txt";
-    private final static String DYNAMIC_FILE_NAME = "dynamic.txt";
-    private final static String MATTER_FILE_NAME = "matter.txt";
-
 
     public Simulation(int particlesPerRow, double distanceBetweenParticles, double initialHeight, double initialSpeed, double charge, double mass) {
         this.matterParticles = new MatterParticles(particlesPerRow, distanceBetweenParticles, charge, mass);
         this.radiationParticle = new Particle(-distanceBetweenParticles, initialHeight, initialSpeed, 0, mass, charge);
-        this.boxLength = this.boxHeight = distanceBetweenParticles * (particlesPerRow - 1);
+        this.boxWidth = this.boxHeight = distanceBetweenParticles * (particlesPerRow - 1);
 
         // save static parameters
         this.initialHeight = initialHeight;
@@ -53,7 +50,7 @@ public class Simulation {
         double dt = Math.pow(10, -15);
         int dt2 = 5;
         Random random = new Random();
-        double initialHeight = (L / 2 - distanceBetweenParticles) + random.nextFloat() * 2 * distanceBetweenParticles ;
+        double initialHeight = (L / 2 - distanceBetweenParticles) + random.nextFloat() * 2 * distanceBetweenParticles;
 
         int steps = Integer.parseInt(System.getProperty("steps", "5000"));
         double stepSize = Double.parseDouble(System.getProperty("stepSize", Double.toString(dt)));
@@ -69,8 +66,30 @@ public class Simulation {
 
     }
 
+    public static void printResult(Vector2D position, Vector2D velocity, double potentialEnergy, PrintWriter printWriter) {
+        printWriter.printf("%.12e %.12e %.12e %.12e %.12e\n", position.x(), position.y(), velocity.x(), velocity.y(), potentialEnergy);
+    }
+
+    public static void printMatter(MatterParticles matter) throws IOException {
+        PrintWriter printWriter = new PrintWriter(new FileWriter(MATTER_FILE_NAME));
+
+        for (Particle particle : matter) {
+            printWriter.printf("%.12e %.12e %d\n", particle.getX(), particle.getY(), Double.compare(particle.getCharge(), 0.0));
+        }
+
+        printWriter.close();
+    }
+
+    public static void printStaticData(double distanceBetweenParticles, int particlesPerRow, double boxHeight, double boxLength, double initialHeight, double initialSpeed, double mass, double charge, double stepSize, int saveFrequency) throws IOException {
+        PrintWriter printWriter = new PrintWriter(new FileWriter(STATIC_FILE_NAME));
+
+        printWriter.printf("%.12e\n%d\n%.12e %.12e\n%.12e\n%.12e\n%.12e\n%.12e\n%.12e\n%d\n", distanceBetweenParticles, particlesPerRow, boxHeight, boxLength, initialHeight, initialSpeed, mass, charge, stepSize, saveFrequency);
+
+        printWriter.close();
+    }
+
     public boolean isFinished(double dCut) {
-        boolean hitYBoundary = Double.compare(radiationParticle.getX() + this.distanceBetweenParticles, 0.0) < 0 || Double.compare(radiationParticle.getX(), boxLength) > 0;
+        boolean hitYBoundary = Double.compare(radiationParticle.getX() + this.distanceBetweenParticles, 0.0) < 0 || Double.compare(radiationParticle.getX(), boxWidth) > 0;
 
         if (hitYBoundary) return true;
 
@@ -120,8 +139,9 @@ public class Simulation {
 
         Vector2D initialPosition = new Vector2D(radiationParticle.getX(), radiationParticle.getY());
         Vector2D initialVelocity = new Vector2D(radiationParticle.getVx(), radiationParticle.getVy());
+        double initialPotentialEnergy = matterParticles.getTotalElectrostaticPotentialEnergy(radiationParticle);
 
-        printResult(initialPosition, initialVelocity, printWriter);
+        printResult(initialPosition, initialVelocity, initialPotentialEnergy, printWriter);
 
         while (!isFinished(dCut)) {
             double nextXPosition = xSolver.getNextPosition(stepSize);
@@ -132,39 +152,18 @@ public class Simulation {
             Vector2D nextPosition = new Vector2D(nextXPosition, nextYPosition);
             Vector2D nextVelocity = new Vector2D(nextXVelocity, nextYVelocity);
 
+            radiationParticle.setPosition(nextPosition);
+            radiationParticle.setVelocity(nextVelocity);
+
             currentStep++;
 
             if (currentStep % saveFrequency == 0) {
-                printResult(nextPosition, nextVelocity, printWriter);
+                double potentialEnergy = matterParticles.getTotalElectrostaticPotentialEnergy(radiationParticle);
+                printResult(nextPosition, nextVelocity, potentialEnergy, printWriter);
             }
 
-            radiationParticle.setPosition(nextPosition);
-            radiationParticle.setVelocity(nextVelocity);
+
         }
-
-        printWriter.close();
-    }
-
-    public static void printResult(Vector2D position, Vector2D velocity, PrintWriter printWriter) {
-        printWriter.printf("%f %f %f %f\n", position.x() * Constants.SCALE_POSITION_FACTOR, position.y()
-                * Constants.SCALE_POSITION_FACTOR, velocity.x(), velocity.y());
-    }
-
-    public static void printMatter(MatterParticles matter) throws IOException {
-        PrintWriter printWriter = new PrintWriter(new FileWriter(MATTER_FILE_NAME));
-
-        for (Particle particle : matter) {
-            printWriter.printf("%f %f %d\n", particle.getX() * Constants.SCALE_POSITION_FACTOR, particle.getY()
-                    * Constants.SCALE_POSITION_FACTOR, Double.compare(particle.getCharge(), 0.0));
-        }
-
-        printWriter.close();
-    }
-
-    public static void printStaticData(double distanceBetweenParticles, int particlesPerRow, double boxHeight, double boxLength, double initialHeight, double initialSpeed, double mass, double charge, double stepSize, int saveFrequency) throws IOException {
-        PrintWriter printWriter = new PrintWriter(new FileWriter(STATIC_FILE_NAME));
-
-        printWriter.printf("%6.3e\n%d\n%6.3e %6.3e\n%6.3e\n%6.3e\n%6.3e\n%6.3e\n%6.3e\n%d\n", distanceBetweenParticles, particlesPerRow, boxHeight, boxLength, initialHeight, initialSpeed, mass, charge, stepSize, saveFrequency);
 
         printWriter.close();
     }
