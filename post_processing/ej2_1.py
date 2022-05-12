@@ -64,7 +64,7 @@ def plot_ej2_1(avg_energies: list[float], stdev_energies: list[float], dts: list
 
 
 def save_plot_data_to_file(avg_energies: list[float], stdev_energies: list[float], dts: list[float]):
-    with open("ej2_1_data.csv", "w") as f:
+    with open("./output_files/ej2_1_data.csv", "w") as f:
         f.write("dt;avg_energy;stdev_energy\n")
         for index, dt in enumerate(dts):
             f.write(f"{dt};{avg_energies[index]};{stdev_energies[index]}\n")
