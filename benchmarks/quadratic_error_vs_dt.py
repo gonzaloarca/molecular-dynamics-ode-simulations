@@ -1,4 +1,5 @@
 import os
+    import time
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -31,20 +32,21 @@ def get_quadratic_error(method_results, analytic_result):
 
 
 def quadratic_error_vs_dt():
-    dts = np.arange(1e-5, 1e-1, 1e-4)
+    dts = np.logspace(-5, -1, 1000)
     quadratic_errors = []
+    startTime = time.perf_counter()
     for dt in dts:
         cmd = f"java -DstepSize={dt} -classpath ./target/classes ar.edu.itba.ss.moleculardynamics.dampedharmonicoscillator.Simulation"
         print(cmd)
         os.system(cmd)
-        print(f"Done dt: {dt}")
         results = get_results()
         quadratic_errors.append(get_quadratic_error(results[1:], results[0]))
 
     for quadratic_error in (np.array(quadratic_errors)).T:
-        print(np.array(quadratic_error))
         plt.plot(dts, quadratic_error)
 
+    end_time = time.perf_counter()
+    print(f"Time: {end_time - startTime}")
     plt.legend(["Verlet", "Beeman", "Gear-Predictor"])
     plt.yscale('log')
     plt.xscale('log')
