@@ -1,10 +1,8 @@
-
-
 import os
 from statistics import mean, stdev
 from matplotlib import pyplot as plt
 
-from ej2_utils.radiation_particle import DYNAMIC_FILE_NAME, parse_simulation_output
+from ej2_utils.ej2_utils import DYNAMIC_FILE_NAME, parse_simulation_output
 
 
 def run_ej2_1_simulations(dts: list[float], initial_heights: list[float], dynamic_file_name: str):
@@ -37,7 +35,7 @@ def get_ej2_1_data(energies_list: list[list[dict]], dts: list[float]):
     for energies in energies_list:
 
         relative_differences = []
-
+        print(energies)
         for energy in energies:
             relative_differences.append(abs(energy["initial"] -
                                             energy["final"]) / energy["initial"])

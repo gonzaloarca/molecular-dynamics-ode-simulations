@@ -57,10 +57,11 @@ def parse_simulation_output():
             particle_movement_output_file.write(
                 f"1\nCOMMENT\n{' '.join(line)} -1\n")
 
+            print(line)
             if line_number == 0:
                 energy["initial"] = calculate_total_energy(
                     mass, float(line[2]), float(line[3]), float(line[4]))
-            else:
+            elif len(line) > 1:
                 energy["final"] = calculate_total_energy(
                     mass, float(line[2]), float(line[3]), float(line[4]))
 
