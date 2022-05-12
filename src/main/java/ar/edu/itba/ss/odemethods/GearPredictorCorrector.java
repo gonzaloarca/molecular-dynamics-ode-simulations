@@ -12,7 +12,14 @@ public class GearPredictorCorrector implements OdeMethod {
     private double currentR4;
     private double currentR5;
 
-    public GearPredictorCorrector(double r0, double v0, double initialR3, double initialR4, double initialR5, BiFunction<Double, Double, Double> force, double mass) {
+    private double alpha0;
+    private double alpha1;
+    private double alpha2;
+    private double alpha3;
+    private double alpha4;
+    private double alpha5;
+
+    public GearPredictorCorrector(double r0, double v0, double initialR3, double initialR4, double initialR5, BiFunction<Double, Double, Double> force, double mass, boolean forceIsVelocityDependent) {
         this.force = force;
         this.mass = mass;
         this.currentR5 = initialR5;
@@ -21,6 +28,12 @@ public class GearPredictorCorrector implements OdeMethod {
         this.currentR2 = force.apply(r0, v0) / mass;
         this.currentR1 = v0;
         this.currentR = r0;
+        this.alpha0 = forceIsVelocityDependent ? 3.0 / 16.0 : 3.0 / 20.0;
+        this.alpha1 = 251.0 / 360.0;
+        this.alpha2 = 1.0;
+        this.alpha3 = 11.0 / 18.0;
+        this.alpha4 = 1.0 / 6.0;
+        this.alpha5 = 1.0 / 60.0;
     }
 
     private double getRPredicted(double stepSize) {
@@ -63,38 +76,32 @@ public class GearPredictorCorrector implements OdeMethod {
     }
 
     private double getRCorrected(double stepSize, double deltaR2, double rPredicted) {
-        double alpha0 = 3.0 / 16.0;
+
 
         return rPredicted + alpha0 * deltaR2;
     }
 
     private double getR1Corrected(double stepSize, double deltaR2, double r1Predicted) {
-        double alpha1 = 251.0 / 360.0;
 
         return r1Predicted + alpha1 * deltaR2 * (1.0 / stepSize);
     }
 
     private double getR2Corrected(double stepSize, double deltaR2, double r2Predicted) {
-        double alpha2 = 1.0;
 
         return r2Predicted + alpha2 * deltaR2 * (2.0 / (stepSize * stepSize));
     }
 
     private double getR3Corrected(double stepSize, double deltaR2, double r3Predicted) {
-        double alpha3 = 11.0 / 18.0;
 
         return r3Predicted + alpha3 * deltaR2 * (6.0 / (stepSize * stepSize * stepSize));
     }
 
     private double getR4Corrected(double stepSize, double deltaR2, double r4Predicted) {
 
-        double alpha4 = 1.0 / 6.0;
         return r4Predicted + alpha4 * deltaR2 * (24.0 / (stepSize * stepSize * stepSize * stepSize));
     }
 
     private double getR5Corrected(double stepSize, double deltaR2, double r5Predicted) {
-
-        double alpha5 = 1.0 / 60.0;
 
         return r5Predicted + alpha5 * deltaR2 * (120.0 / (stepSize * stepSize * stepSize * stepSize * stepSize));
     }

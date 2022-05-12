@@ -36,7 +36,7 @@ public class Simulation {
         double distanceBetweenParticles = Math.pow(10, -8);
         int particlesPerRow = 16;
         double L = (particlesPerRow - 1) * distanceBetweenParticles;
-        double dt = Math.pow(10, -14);
+        double dt = Math.pow(10, -15);
         int dt2 = 1;
         Random random = new Random();
 
@@ -127,8 +127,8 @@ public class Simulation {
         Function<Particle, BiFunction<Double, Double, Double>> xForce = (p) -> (r, v) -> matterParticles.getTotalElectrostaticForce(p).x();
         Function<Particle, BiFunction<Double, Double, Double>> yForce = (p) -> (r, v) -> matterParticles.getTotalElectrostaticForce(p).y();
 
-        OdeMethod xSolver = new GearPredictorCorrector(radiationParticle.getX(), radiationParticle.getVx(), 0, 0, 0, xForce.apply(this.radiationParticle), radiationParticle.getMass());
-        OdeMethod ySolver = new GearPredictorCorrector(radiationParticle.getY(), radiationParticle.getVy(), 0, 0, 0, yForce.apply(this.radiationParticle), radiationParticle.getMass());
+        OdeMethod xSolver = new GearPredictorCorrector(radiationParticle.getX(), radiationParticle.getVx(), 0, 0, 0, xForce.apply(this.radiationParticle), radiationParticle.getMass(),false);
+        OdeMethod ySolver = new GearPredictorCorrector(radiationParticle.getY(), radiationParticle.getVy(), 0, 0, 0, yForce.apply(this.radiationParticle), radiationParticle.getMass(),false);
 
         double dCut = 0.01 * distanceBetweenParticles;
 

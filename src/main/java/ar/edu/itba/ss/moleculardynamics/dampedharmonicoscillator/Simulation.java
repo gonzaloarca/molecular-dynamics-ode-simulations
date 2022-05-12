@@ -25,7 +25,7 @@ public class Simulation {
         double initialR4 = (-k * initialR2 - gamma * initialR3) / mass;
         double initialR5 = (-k * initialR3 - gamma * initialR4) / mass;
 
-        methods.add(new GearPredictorCorrector(r0, v0, initialR3, initialR4, initialR5, force, mass));
+        methods.add(new GearPredictorCorrector(r0, v0, initialR3, initialR4, initialR5, force, mass,true));
 
     }
 
