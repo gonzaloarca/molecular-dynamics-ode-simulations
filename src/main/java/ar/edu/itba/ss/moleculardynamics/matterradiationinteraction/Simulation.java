@@ -21,7 +21,6 @@ public class Simulation {
     private final double boxHeight;
 
 
-
     public Simulation(int particlesPerRow, double distanceBetweenParticles, double initialHeight, double initialSpeed, double charge, double mass) {
         this.matterParticles = new MatterParticles(particlesPerRow, distanceBetweenParticles, charge, mass);
         this.radiationParticle = new Particle(-distanceBetweenParticles, initialHeight, initialSpeed, 0, mass, charge);
@@ -36,47 +35,46 @@ public class Simulation {
         double distanceBetweenParticles = Math.pow(10, -8);
         int particlesPerRow = 16;
         double L = (particlesPerRow - 1) * distanceBetweenParticles;
-        double dt = Math.pow(10, -15);
-        int dt2 = 5;
+        double dt = Math.pow(10, -14);
+        int dt2 = 1;
         Random random = new Random();
 
-        
-        
-        int steps = Integer.parseInt(System.getProperty("steps", "5000"));
         double stepSize = Double.parseDouble(System.getProperty("stepSize", Double.toString(dt)));
         int saveFrequency = Integer.parseInt(System.getProperty("saveFrequency", Integer.toString(dt2)));
-        double initialSpeed = Double.parseDouble(System.getProperty("initialSpeed", "10000"));
+        double initialSpeed = Double.parseDouble(System.getProperty("initialSpeed", "50000"));
         double initialHeightRatio = Double.parseDouble(System.getProperty("initialHeightRatio", Double.toString(random.nextDouble())));
 
         double initialHeight = (L / 2 - distanceBetweenParticles) + initialHeightRatio * 2 * distanceBetweenParticles;
-        
+        System.out.println("Initial height: " + initialHeight);
+        System.out.println("Step size: " + stepSize);
+
         Simulation simulation = new Simulation(particlesPerRow, distanceBetweenParticles, initialHeight, initialSpeed, charge, mass);
 
         printStaticData(distanceBetweenParticles, particlesPerRow, L, L, initialHeight, initialSpeed, mass, charge, stepSize, saveFrequency);
         printMatter(simulation.matterParticles);
 
-        simulation.solveGear(stepSize, steps, saveFrequency);
+        simulation.solveGear(stepSize, saveFrequency);
 
     }
 
     public static void printResult(Vector2D position, Vector2D velocity, double potentialEnergy, PrintWriter printWriter) {
-        printWriter.printf("%.12e %.12e %.12e %.12e %.12e\n", position.x(), position.y(), velocity.x(), velocity.y(), potentialEnergy);
+        printWriter.printf("%.23e %.23e %.23e %.23e %.23e\n", position.x(), position.y(), velocity.x(), velocity.y(), potentialEnergy);
     }
 
     public static void printMatter(MatterParticles matter) throws IOException {
         PrintWriter printWriter = new PrintWriter(new FileWriter(MATTER_FILE_NAME));
 
         for (Particle particle : matter) {
-            printWriter.printf("%.12e %.12e %d\n", particle.getX(), particle.getY(), Double.compare(particle.getCharge(), 0.0));
+            printWriter.printf("%.23e %.23e %d\n", particle.getX(), particle.getY(), Double.compare(particle.getCharge(), 0.0));
         }
 
         printWriter.close();
     }
 
-    public static void printStaticData(double distanceBetweenParticles, int particlesPerRow, double boxHeight, double boxLength, double initialHeight, double initialSpeed, double mass, double charge, double stepSize, int saveFrequency) throws IOException {
+    public static void printStaticData(double distanceBetweenParticles, int particlesPerRow, double boxHeight, double boxWidth, double initialHeight, double initialSpeed, double mass, double charge, double stepSize, int saveFrequency) throws IOException {
         PrintWriter printWriter = new PrintWriter(new FileWriter(STATIC_FILE_NAME));
 
-        printWriter.printf("%.12e\n%d\n%.12e %.12e\n%.12e\n%.12e\n%.12e\n%.12e\n%.12e\n%d\n", distanceBetweenParticles, particlesPerRow, boxHeight, boxLength, initialHeight, initialSpeed, mass, charge, stepSize, saveFrequency);
+        printWriter.printf("%.23e\n%d\n%.23e %.23e\n%.23e\n%.23e\n%.23e\n%.23e\n%.23e\n%d\n", distanceBetweenParticles, particlesPerRow, boxHeight, boxWidth, initialHeight, initialSpeed, mass, charge, stepSize, saveFrequency);
 
         printWriter.close();
     }
@@ -109,16 +107,9 @@ public class Simulation {
         return wasAbsorbed;
     }
 
-    public void solveGear(double stepSize, double steps, int saveFrequency) throws IOException {
+    public void solveGear(double stepSize, int saveFrequency) throws IOException {
 
-        Function<Particle, BiFunction<Double, Double, Double>> xForce = (p) -> {
-            System.out.println(p.getX());
-            return (r, v) -> {
-                System.out.println(p.getX());
-                Vector2D vector2D = matterParticles.getTotalElectrostaticForce(p);
-                return vector2D.x();
-            };
-        };
+        Function<Particle, BiFunction<Double, Double, Double>> xForce = (p) -> (r, v) -> matterParticles.getTotalElectrostaticForce(p).x();
         Function<Particle, BiFunction<Double, Double, Double>> yForce = (p) -> (r, v) -> matterParticles.getTotalElectrostaticForce(p).y();
 
         OdeMethod xSolver = new GearPredictorCorrector(radiationParticle.getX(), radiationParticle.getVx(), 0, 0, 0, xForce.apply(this.radiationParticle), radiationParticle.getMass());

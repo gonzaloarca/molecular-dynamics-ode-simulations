@@ -1,11 +1,12 @@
 import os
 from statistics import mean, stdev
 from matplotlib import pyplot as plt
+import numpy as np
 
-from ej2_utils.ej2_utils import DYNAMIC_FILE_NAME, parse_simulation_output
+from ej2_utils.ej2_utils import parse_simulation_output
 
 
-def run_ej2_1_simulations(dts: list[float], initial_heights: list[float], dynamic_file_name: str):
+def run_ej2_1_simulations(dts: list[float], initial_heights: list[float]):
     energies_list = []
 
     for dt in dts:
@@ -13,7 +14,7 @@ def run_ej2_1_simulations(dts: list[float], initial_heights: list[float], dynami
         energies = []
 
         for initial_height in initial_heights:
-            cmd = f"java -DstepSize={dt} -DinitialHeight={initial_height} -DoutputFileName={dynamic_file_name} -jar ./target/molecular-dynamics-ode-simulations-1.0-SNAPSHOT.jar"
+            cmd = f"java -DstepSize={dt} -DinitialHeightRatio={initial_height} -DinitialSpeed={5e4} -jar ./target/molecular-dynamics-ode-simulations-1.0-SNAPSHOT.jar"
 
             print(f"Executing: {cmd}")
             os.system(cmd)
@@ -35,7 +36,7 @@ def get_ej2_1_data(energies_list: list[list[dict]], dts: list[float]):
     for energies in energies_list:
 
         relative_differences = []
-        print(energies)
+
         for energy in energies:
             relative_differences.append(abs(energy["initial"] -
                                             energy["final"]) / energy["initial"])
@@ -47,21 +48,37 @@ def get_ej2_1_data(energies_list: list[list[dict]], dts: list[float]):
 
 
 def plot_ej2_1(avg_energies: list[float], stdev_energies: list[float], dts: list[float]):
-    plt.errorbar(dts, avg_energies, yerr=stdev_energies, fmt='o')
-    plt.xlabel("dt")
-    plt.ylabel("Relative difference")
+    plt.errorbar(dts, avg_energies, yerr=stdev_energies,
+                 ls="none", ecolor="blue", marker="o", color="red", elinewidth=0.5, capsize=5)
+    plt.xlabel("Paso de integración (s)")
+    plt.ylabel("Diferencia relativa promedio")
+
+    # annotate each point with its value
+    for index, dt in enumerate(dts):
+        plt.annotate(f"{avg_energies[index]:.4e}", (dt, avg_energies[index]))
+
+    plt.xscale("log")
+    # plt.yscale("log")
+
     plt.show()
 
 
+def save_plot_data_to_file(avg_energies: list[float], stdev_energies: list[float], dts: list[float]):
+    with open("ej2_1_data.csv", "w") as f:
+        f.write("dt;avg_energy;stdev_energy\n")
+        for index, dt in enumerate(dts):
+            f.write(f"{dt};{avg_energies[index]};{stdev_energies[index]}\n")
+
+
 if __name__ == "__main__":
-    dts = [1e-10, 1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2]
-    initial_heights = [0, 0.25, 0.5, 0.75, 1]
+    # dts = np.logspace(-19, -14, 7)
+    dts = [1e-14, 5e-15, 1e-15, 5e-16, 1e-16, 5e-17, 1e-17]
+    initial_heights = np.linspace(0, 1, 5)
 
     energies_list = run_ej2_1_simulations(
-        dts, initial_heights, DYNAMIC_FILE_NAME)
+        dts, initial_heights)
 
     avg_energies, stdev_energies = get_ej2_1_data(energies_list, dts)
 
+    save_plot_data_to_file(avg_energies, stdev_energies, dts)
     plot_ej2_1(avg_energies, stdev_energies, dts)
-
-    print(f"Average energies: {avg_energies}")

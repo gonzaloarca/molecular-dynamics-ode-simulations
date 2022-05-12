@@ -24,6 +24,8 @@ public class MatterParticles implements Iterable<Particle> {
     }
 
     private void initialize(double distanceBetweenParticles, double charge, double mass) {
+        double L = distanceBetweenParticles * (particlesPerRow - 1);
+
         for (int i = 0; i < matrix.length; i++) {
             charge = -charge;
             for (int j = 0; j < matrix[i].length; j++) {

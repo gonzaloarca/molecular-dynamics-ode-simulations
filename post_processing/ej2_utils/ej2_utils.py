@@ -1,3 +1,6 @@
+from matplotlib import pyplot as plt
+
+
 MATTER_FILE_NAME = "matter.txt"
 DYNAMIC_FILE_NAME = "dynamic.txt"
 STATIC_FILE_NAME = "static.txt"
@@ -18,19 +21,18 @@ def parse_static_parameters():
                 static_parameters["particles_per_row"] = int(line.split()[0])
             elif line_number == 2:
                 static_parameters["box_height"] = float(line.split()[0])
+                static_parameters["box_width"] = float(line.split()[1])
             elif line_number == 3:
-                static_parameters["box_width"] = float(line.split()[0])
-            elif line_number == 4:
                 static_parameters["initial_height"] = float(line.split()[0])
-            elif line_number == 5:
+            elif line_number == 4:
                 static_parameters["initial_speed"] = float(line.split()[0])
-            elif line_number == 6:
+            elif line_number == 5:
                 static_parameters["mass"] = float(line.split()[0])
-            elif line_number == 7:
+            elif line_number == 6:
                 static_parameters["charge"] = float(line.split()[0])
-            elif line_number == 8:
+            elif line_number == 7:
                 static_parameters["step_size"] = float(line.split()[0])
-            elif line_number == 9:
+            elif line_number == 8:
                 static_parameters["save_frequency"] = float(line.split()[0])
 
     return static_parameters
@@ -57,15 +59,20 @@ def parse_simulation_output():
             particle_movement_output_file.write(
                 f"1\nCOMMENT\n{' '.join(line)} -1\n")
 
-            print(line)
+            total_energy = calculate_total_energy(mass, float(
+                line[2]), float(line[3]), float(line[4]))
+
             if line_number == 0:
-                energy["initial"] = calculate_total_energy(
-                    mass, float(line[2]), float(line[3]), float(line[4]))
-            elif len(line) > 1:
-                energy["final"] = calculate_total_energy(
-                    mass, float(line[2]), float(line[3]), float(line[4]))
+                energy["initial"] = total_energy
+            else:
+                energy["final"] = total_energy
+
+    if energy["final"] is None:
+        energy["final"] = energy["initial"]
 
     particle_movement_output_file.close()
+
+    # plt.plot(energy_list)
 
     return energy
 
@@ -88,7 +95,7 @@ def generate_matter_file():
 
 
 def calculate_total_energy(mass, vx, vy, potential_energy):
-    return mass * (vx ** 2 + vy ** 2) + potential_energy
+    return mass * (vx ** 2 + vy ** 2) * 0.5 + potential_energy
 
 
 def main():
