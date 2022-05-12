@@ -19,24 +19,13 @@ public class Simulation {
     private final double distanceBetweenParticles;
     private final double boxWidth;
     private final double boxHeight;
-    private final double initialHeight;
-    private final double initialSpeed;
-    private final double mass;
-    private final double charge;
-    private final int particlesPerRow;
+
 
 
     public Simulation(int particlesPerRow, double distanceBetweenParticles, double initialHeight, double initialSpeed, double charge, double mass) {
         this.matterParticles = new MatterParticles(particlesPerRow, distanceBetweenParticles, charge, mass);
         this.radiationParticle = new Particle(-distanceBetweenParticles, initialHeight, initialSpeed, 0, mass, charge);
         this.boxWidth = this.boxHeight = distanceBetweenParticles * (particlesPerRow - 1);
-
-        // save static parameters
-        this.initialHeight = initialHeight;
-        this.initialSpeed = initialSpeed;
-        this.charge = charge;
-        this.mass = mass;
-        this.particlesPerRow = particlesPerRow;
         this.distanceBetweenParticles = distanceBetweenParticles;
     }
 
@@ -50,14 +39,17 @@ public class Simulation {
         double dt = Math.pow(10, -15);
         int dt2 = 5;
         Random random = new Random();
-        double defaultInitialHeight = (L / 2 - distanceBetweenParticles) + random.nextFloat() * 2 * distanceBetweenParticles;
 
+        
+        
         int steps = Integer.parseInt(System.getProperty("steps", "5000"));
         double stepSize = Double.parseDouble(System.getProperty("stepSize", Double.toString(dt)));
         int saveFrequency = Integer.parseInt(System.getProperty("saveFrequency", Integer.toString(dt2)));
         double initialSpeed = Double.parseDouble(System.getProperty("initialSpeed", "10000"));
-        double initialHeight = Double.parseDouble(System.getProperty("initialHeight", Double.toString(defaultInitialHeight)));
+        double initialHeightRatio = Double.parseDouble(System.getProperty("initialHeightRatio", Double.toString(random.nextDouble())));
 
+        double initialHeight = (L / 2 - distanceBetweenParticles) + initialHeightRatio * 2 * distanceBetweenParticles;
+        
         Simulation simulation = new Simulation(particlesPerRow, distanceBetweenParticles, initialHeight, initialSpeed, charge, mass);
 
         printStaticData(distanceBetweenParticles, particlesPerRow, L, L, initialHeight, initialSpeed, mass, charge, stepSize, saveFrequency);
