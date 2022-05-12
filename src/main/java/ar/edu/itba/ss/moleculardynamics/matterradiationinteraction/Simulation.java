@@ -14,6 +14,7 @@ public class Simulation {
     private final static String STATIC_FILE_NAME = "static.txt";
     private final static String DYNAMIC_FILE_NAME = "dynamic.txt";
     private final static String MATTER_FILE_NAME = "matter.txt";
+    private final static String SUMMARY_FILE_NAME = "summary.txt";
     private final MatterParticles matterParticles;
     private final Particle radiationParticle;
     private final double distanceBetweenParticles;
@@ -81,14 +82,22 @@ public class Simulation {
         printWriter.close();
     }
 
-    public boolean isFinished(double dCut) {
+    public static void printSummaryData(SimulationStatus finishReason) throws IOException {
+        PrintWriter printWriter = new PrintWriter(new FileWriter(SUMMARY_FILE_NAME));
+
+        printWriter.print(finishReason);
+
+        printWriter.close();
+    }
+
+    public SimulationStatus isFinished(double dCut) {
         boolean hitYBoundary = Double.compare(radiationParticle.getX() + this.distanceBetweenParticles, 0.0) < 0 || Double.compare(radiationParticle.getX(), boxWidth) > 0;
 
-        if (hitYBoundary) return true;
+        if (hitYBoundary) return SimulationStatus.ESCAPED;
 
         boolean hitXBoundary = Double.compare(radiationParticle.getY(), 0.0) < 0 || Double.compare(radiationParticle.getY(), boxHeight) > 0;
 
-        if (hitXBoundary) return true;
+        if (hitXBoundary) return SimulationStatus.ESCAPED;
 
         double xModulus = Math.abs(radiationParticle.getX()) % distanceBetweenParticles;
         double yModulus = radiationParticle.getY() % distanceBetweenParticles;
@@ -106,7 +115,9 @@ public class Simulation {
 
         boolean wasAbsorbed = upperLeftDistance < dCut || upperRightDistance < dCut || lowerLeftDistance < dCut || lowerRightDistance < dCut;
 
-        return wasAbsorbed;
+        if(wasAbsorbed) return SimulationStatus.ABSORBED;
+
+        return SimulationStatus.NOT_FINISHED;
     }
 
     public void solveGear(double stepSize, double steps, int saveFrequency) throws IOException {
@@ -136,7 +147,9 @@ public class Simulation {
 
         printResult(initialPosition, initialVelocity, initialPotentialEnergy, printWriter);
 
-        while (!isFinished(dCut)) {
+        SimulationStatus status;
+
+        while ((status = isFinished(dCut)) == SimulationStatus.NOT_FINISHED) {
             double nextXPosition = xSolver.getNextPosition(stepSize);
             double nextYPosition = ySolver.getNextPosition(stepSize);
             double nextXVelocity = xSolver.getNextVelocity(stepSize);
@@ -155,8 +168,9 @@ public class Simulation {
                 printResult(nextPosition, nextVelocity, potentialEnergy, printWriter);
             }
 
-
         }
+
+        printSummaryData(status);
 
         printWriter.close();
     }
