@@ -91,13 +91,17 @@ public class Simulation {
     }
 
     public SimulationStatus isFinished(double dCut) {
-        boolean hitYBoundary = Double.compare(radiationParticle.getX() + this.distanceBetweenParticles, 0.0) < 0 || Double.compare(radiationParticle.getX(), boxWidth) > 0;
+        boolean hitYLeftBoundary = Double.compare(radiationParticle.getX() + this.distanceBetweenParticles, 0.0) < 0;
+        if (hitYLeftBoundary) return SimulationStatus.LEFT_ESCAPED;
 
-        if (hitYBoundary) return SimulationStatus.ESCAPED;
+        boolean hitYRightBoundary = Double.compare(radiationParticle.getX(), boxWidth) > 0;
+        if (hitYRightBoundary) return SimulationStatus.RIGHT_ESCAPED;
 
-        boolean hitXBoundary = Double.compare(radiationParticle.getY(), 0.0) < 0 || Double.compare(radiationParticle.getY(), boxHeight) > 0;
+        boolean hitXBottomBoundary = Double.compare(radiationParticle.getY(), 0.0) < 0;
+        if (hitXBottomBoundary) return SimulationStatus.BOTTOM_ESCAPED;
 
-        if (hitXBoundary) return SimulationStatus.ESCAPED;
+        boolean hitXTopBoundary = Double.compare(radiationParticle.getY(), boxHeight) > 0;
+        if (hitXTopBoundary) return SimulationStatus.TOP_ESCAPED;
 
         double xModulus = Math.abs(radiationParticle.getX()) % distanceBetweenParticles;
         double yModulus = radiationParticle.getY() % distanceBetweenParticles;
