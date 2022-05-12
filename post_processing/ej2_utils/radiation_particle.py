@@ -1,7 +1,6 @@
 MATTER_FILE_NAME = "matter.txt"
 DYNAMIC_FILE_NAME = "dynamic.txt"
 STATIC_FILE_NAME = "static.txt"
-ENERGY_FILE_NAME = "energy.txt"
 
 PARTICLE_XYZ_MOVEMENT_FILE_NAME = "particle_movement.xyz"
 MATTER_XYZ_FILE_NAME = "matter.xyz"
@@ -44,7 +43,11 @@ def parse_simulation_output():
     mass = static_parameters["mass"]
 
     particle_movement_output_file = open(PARTICLE_XYZ_MOVEMENT_FILE_NAME, 'w')
-    energy_output_file = open(ENERGY_FILE_NAME, 'w')
+
+    energy = {
+        "initial": None,
+        "final": None
+    }
 
     with open(DYNAMIC_FILE_NAME) as f:
         for line_number, line in enumerate(f):
@@ -54,11 +57,16 @@ def parse_simulation_output():
             particle_movement_output_file.write(
                 f"1\nCOMMENT\n{' '.join(line)} -1\n")
 
-            kinetic_energy = mass * (float(line[2]) ** 2 + float(line[3]) ** 2)
-            potential_energy = float(line[4])
-            energy_output_file.write(f"{kinetic_energy + potential_energy}\n")
+            if line_number == 0:
+                energy["initial"] = calculate_total_energy(
+                    mass, float(line[2]), float(line[3]), float(line[4]))
+            else:
+                energy["final"] = calculate_total_energy(
+                    mass, float(line[2]), float(line[3]), float(line[4]))
 
     particle_movement_output_file.close()
+
+    return energy
 
 
 def generate_matter_file():
@@ -78,9 +86,13 @@ def generate_matter_file():
     matter_output_file.close()
 
 
+def calculate_total_energy(mass, vx, vy, potential_energy):
+    return mass * (vx ** 2 + vy ** 2) + potential_energy
+
+
 def main():
     generate_matter_file()
-    parse_simulation_output()
+    energy = parse_simulation_output()
 
 
 if __name__ == "__main__":

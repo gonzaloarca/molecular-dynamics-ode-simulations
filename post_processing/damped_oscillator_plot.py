@@ -15,7 +15,7 @@ def plot_methods(total_time, steps: int, results: list[list], methods: list[str]
 
 if __name__ == '__main__':
     results = []
-    with open('../output.csv', 'r') as f:
+    with open('output.csv', 'r') as f:
         for line_number, line in enumerate(f):
             if line_number == 0:
                 methods = line.split(";")

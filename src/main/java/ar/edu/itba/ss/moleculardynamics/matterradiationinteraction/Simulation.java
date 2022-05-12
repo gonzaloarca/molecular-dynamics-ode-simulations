@@ -41,6 +41,7 @@ public class Simulation {
     }
 
     public static void main(String[] args) throws IOException {
+        String outputFileName = System.getProperty("outputFileName", "output.csv");
 
         double charge = Math.pow(10, -19);
         double mass = Math.pow(10, -27);
@@ -50,7 +51,20 @@ public class Simulation {
         double dt = Math.pow(10, -15);
         int dt2 = 5;
         Random random = new Random();
-        double initialHeight = (L / 2 - distanceBetweenParticles) + random.nextFloat() * 2 * distanceBetweenParticles;
+
+        String initialHeightRatioStr = System.getProperty("initialHeightRatio", "0.5");
+
+
+        double initialHeightRatio;
+
+        if (initialHeightRatioStr == null) {
+            initialHeightRatio = random.nextDouble();
+        } else {
+            initialHeightRatio = Double.parseDouble(initialHeightRatioStr);
+        }
+
+        double initialHeight = (L / 2 - distanceBetweenParticles) + initialHeightRatio * 2 * distanceBetweenParticles;
+
 
         int steps = Integer.parseInt(System.getProperty("steps", "5000"));
         double stepSize = Double.parseDouble(System.getProperty("stepSize", Double.toString(dt)));
