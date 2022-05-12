@@ -50,12 +50,13 @@ public class Simulation {
         double dt = Math.pow(10, -15);
         int dt2 = 5;
         Random random = new Random();
-        double initialHeight = (L / 2 - distanceBetweenParticles) + random.nextFloat() * 2 * distanceBetweenParticles;
+        double defaultInitialHeight = (L / 2 - distanceBetweenParticles) + random.nextFloat() * 2 * distanceBetweenParticles;
 
         int steps = Integer.parseInt(System.getProperty("steps", "5000"));
         double stepSize = Double.parseDouble(System.getProperty("stepSize", Double.toString(dt)));
         int saveFrequency = Integer.parseInt(System.getProperty("saveFrequency", Integer.toString(dt2)));
         double initialSpeed = Double.parseDouble(System.getProperty("initialSpeed", "10000"));
+        double initialHeight = Double.parseDouble(System.getProperty("initialHeight", Double.toString(defaultInitialHeight)));
 
         Simulation simulation = new Simulation(particlesPerRow, distanceBetweenParticles, initialHeight, initialSpeed, charge, mass);
 
