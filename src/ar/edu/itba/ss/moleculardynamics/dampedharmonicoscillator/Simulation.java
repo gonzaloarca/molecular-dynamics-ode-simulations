@@ -32,8 +32,9 @@ public class Simulation {
     public static void main(String[] args) throws IOException {
 
         String outputFileName = System.getProperty("outputFileName", "output.csv");
-        int steps = Integer.parseInt(System.getProperty("steps", "5000"));
-        double stepSize = Double.parseDouble(System.getProperty("stepSize", "0.001"));
+        double time = Double.parseDouble(System.getProperty("time", "5"));
+        double stepSize = Double.parseDouble(System.getProperty("stepSize", "0.1"));
+        int steps = (int) (time / stepSize);
 
         double r0 = 1;
         double gamma = 100;
