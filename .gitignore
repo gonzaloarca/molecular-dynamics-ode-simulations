@@ -52,3 +52,4 @@ __pycache__/
 
 # csv files
 *.csv
+!/output_files/ej2_2.txt
