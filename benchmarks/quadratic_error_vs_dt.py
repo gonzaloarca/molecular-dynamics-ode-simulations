@@ -39,7 +39,7 @@ def quadratic_error_vs_dt():
     output_file = open('./output_files/ECM.csv', 'w')
 
     for dt in dts:
-        cmd = f"java -DstepSize={dt} -classpath ./target/classes ar.edu.itba.ss.moleculardynamics.dampedharmonicoscillator.Simulation"
+        cmd = f"java -DstepSize={dt} -jar ./target/molecular-dynamics-ode-simulations-1.0-SNAPSHOT.jar"
         print(cmd)
         os.system(cmd)
         results = get_results()
