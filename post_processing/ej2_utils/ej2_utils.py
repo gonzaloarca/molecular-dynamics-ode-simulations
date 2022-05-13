@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+import numpy as np
 
 
 MATTER_FILE_NAME = "matter.txt"
@@ -38,7 +39,20 @@ def parse_static_parameters():
     return static_parameters
 
 
+def sci_notation(number, sig_fig=2):
+    ret_string = "{0:.2e}".format(number, sig_fig)
+    a, b = ret_string.split("e")
+    # remove leading "+" and strip leading zeros
+    b = int(b)
+    return a + f"$\\times 10^{{{b}}}$"
+
+
 def parse_simulation_output():
+    fig, ax = plt.subplots()
+    ax.xaxis.set_major_formatter(
+        plt.FuncFormatter(sci_notation))
+    ax.yaxis.set_major_formatter(
+        plt.FuncFormatter(sci_notation))
 
     static_parameters = parse_static_parameters()
 
@@ -51,6 +65,10 @@ def parse_simulation_output():
         "final": None
     }
 
+    kinetic_energy = []
+    potential_energy = []
+    total_energies = []
+
     with open(DYNAMIC_FILE_NAME) as f:
         for line_number, line in enumerate(f):
             # x y vx vy potential_energy
@@ -62,6 +80,11 @@ def parse_simulation_output():
             total_energy = calculate_total_energy(mass, float(
                 line[2]), float(line[3]), float(line[4]))
 
+            kinetic_energy.append(
+                0.5*(float(line[2]) ** 2 + float(line[3]) ** 2))
+            potential_energy.append(float(line[4]))
+            total_energies.append(total_energy)
+
             if line_number == 0:
                 energy["initial"] = total_energy
             else:
@@ -72,7 +95,19 @@ def parse_simulation_output():
 
     particle_movement_output_file.close()
 
-    # plt.plot(energy_list)
+    steps = len(kinetic_energy)
+    final_time = steps * static_parameters["step_size"]
+    ax.plot(np.linspace(0, final_time, steps),
+            total_energies, color="blue")
+    plt.xlabel("Tiempo [s]", fontdict={"fontsize": 22})
+    plt.ylabel("Energía total [J]", fontdict={"fontsize": 22})
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=20)
+    plt.yscale("log")
+    plt.tight_layout()
+    # plt.plot(np.linspace(0, final_time, steps), potential_energy)
+
+    plt.show()
 
     return energy
 
