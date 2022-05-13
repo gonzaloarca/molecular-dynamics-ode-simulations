@@ -18,7 +18,7 @@ class SimulationStatus(enum.Enum):
 def percentage_notation(x, pos):
     if x > 1:
         return ''
-    return '{:.2%}'.format(x)
+    return f"{x:.2}"
 
 
 def sci_notation(number, sig_fig=2):
@@ -97,19 +97,24 @@ def plot_end_state_percentages_vs_velocity(absorbed, escaped_left, escaped_right
     legends = ["Absorbidos", "Escapados por la izquierda", "Escapados por la derecha",
                "Escapados por la parte inferior", "Escapados por la parte superior"]
 
-    ind = np.arange(len(velocities))
-    width = 0.17
+    ind = np.arange(len(velocities)) + 5000
+    ind = ind * 1.5
+    width = 0.175
+    print(ind)
     ax.bar(ind-2*width, absorbed, width=width, align='center')
     ax.bar(ind-width, escaped_left, width=width, align='center')
     ax.bar(ind, escaped_right, width=width, align='center')
     ax.bar(ind+width, escaped_bottom, width=width, align='center')
     ax.bar(ind+2*width, escaped_top, width=width, align='center')
+
     ax.set_xticks(ind)
-    ax.set_xticklabels(velocities)
+    ax.set_xticklabels(velocities, fontsize=15)
     ax.autoscale(tight=True)
     plt.xlabel('Velocidad [m/s]', fontsize=15)
-    plt.ylabel('Porcentaje de estados finales', fontsize=15)
+    plt.ylabel('Proporción de estados finales', fontsize=15)
     plt.ylim(0, 1.5)
+    ax.tick_params(axis='both', which='major', labelsize=15)
+    ax.tick_params(axis='both', which='minor', labelsize=15)
     plt.legend(legends, fontsize=15)
     plt.show()
 
