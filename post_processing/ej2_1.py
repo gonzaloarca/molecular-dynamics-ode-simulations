@@ -50,14 +50,12 @@ def get_ej2_1_data(energies_list: list[list[dict]], dts: list[float]):
 def plot_ej2_1(avg_energies: list[float], stdev_energies: list[float], dts: list[float]):
     plt.errorbar(dts, avg_energies, yerr=stdev_energies,
                  ls="none", ecolor="blue", marker="o", color="red", elinewidth=0.5, capsize=5)
-    plt.xlabel("Paso de integración (s)")
-    plt.ylabel("Diferencia relativa promedio")
+    plt.xlabel("Paso de integración (s)", fontsize=20)
+    plt.ylabel("Diferencia relativa promedio", fontsize=20)
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
 
-    # annotate each point with its value
-    for index, dt in enumerate(dts):
-        plt.annotate(f"{avg_energies[index]:.4e}", (dt, avg_energies[index]))
-
-    plt.xscale("log")
+    # plt.xscale("log")
     # plt.yscale("log")
 
     plt.show()
