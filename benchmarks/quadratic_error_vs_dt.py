@@ -4,6 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def sci_notation(number, sig_fig=2):
+    ret_string = "{0:.2e}".format(number, sig_fig)
+    a, b = ret_string.split("e")
+    # remove leading "+" and strip leading zeros
+    b = int(b)
+    return a + f"$\\times 10^{{{b}}}$"
+
+
 def get_results():
     results = []
     with open('./output.csv', 'r') as f:
@@ -32,7 +40,7 @@ def get_quadratic_error(method_results, analytic_result):
 
 
 def quadratic_error_vs_dt():
-    dts = np.logspace(-5, -1, 10)
+    dts = np.logspace(-5, -1, 100)
     quadratic_errors = []
     startTime = time.perf_counter()
 
@@ -68,15 +76,31 @@ def get_quadratic_error_from_file():
 
 
 def plot_quadratic_error_vs_dt(dts, quadratic_errors):
+    fig, ax = plt.subplots()
+
     for quadratic_error in (np.array(quadratic_errors)).T:
-        plt.plot(dts, quadratic_error)
-    plt.legend(["Verlet", "Beeman", "Gear-Predictor"])
+        ax.plot(dts, quadratic_error)
+
     plt.yscale('log')
     plt.xscale('log')
+
+    ax.xaxis.set_major_formatter(
+        plt.FuncFormatter(sci_notation))
+
+    ax.yaxis.set_major_formatter(
+        plt.FuncFormatter(sci_notation))
+
+    plt.xlabel('dt [$s$]', fontsize=25)
+    plt.ylabel('Error cuadrático medio [$m^{2}$]', fontsize=25)
+
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+
+    plt.legend(["Verlet", "Beeman", "Gear Predictor-Corrector"], fontsize=25)
     plt.show()
 
 
 if __name__ == '__main__':
-    dts, quadratic_errors = quadratic_error_vs_dt()
-    # dts, quadratic_errors = get_quadratic_error_from_file()
+    # dts, quadratic_errors = quadratic_error_vs_dt()
+    dts, quadratic_errors = get_quadratic_error_from_file()
     plot_quadratic_error_vs_dt(dts, quadratic_errors)

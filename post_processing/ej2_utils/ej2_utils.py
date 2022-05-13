@@ -57,7 +57,7 @@ def parse_simulation_output():
             line = line.split()
 
             particle_movement_output_file.write(
-                f"1\nCOMMENT\n{' '.join(line)} -1\n")
+                f"1\nCOMMENT\n{' '.join(line)} -1 1\n")
 
             total_energy = calculate_total_energy(mass, float(
                 line[2]), float(line[3]), float(line[4]))
