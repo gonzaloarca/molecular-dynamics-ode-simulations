@@ -49,6 +49,8 @@ def sci_notation(number, sig_fig=2):
 
 def parse_simulation_output():
     fig, ax = plt.subplots()
+    ax.set_yscale('log')
+    ax.set_xticks(font_size=20)
     ax.xaxis.set_major_formatter(
         plt.FuncFormatter(sci_notation))
     ax.yaxis.set_major_formatter(
@@ -103,7 +105,6 @@ def parse_simulation_output():
     plt.ylabel("Energía total [J]", fontdict={"fontsize": 22})
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=20)
-    plt.yscale("log")
     plt.tight_layout()
     # plt.plot(np.linspace(0, final_time, steps), potential_energy)
 

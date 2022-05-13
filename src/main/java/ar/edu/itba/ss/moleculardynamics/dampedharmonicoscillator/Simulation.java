@@ -33,12 +33,12 @@ public class Simulation {
 
         String outputFileName = System.getProperty("outputFileName", "output.csv");
         double time = Double.parseDouble(System.getProperty("time", "5"));
-        double stepSize = Double.parseDouble(System.getProperty("stepSize", "0.1"));
+        double stepSize = Double.parseDouble(System.getProperty("stepSize", "0.01"));
         int steps = (int) (time / stepSize);
 
         double r0 = 1;
         double gamma = 100;
-        double k = 10000;
+        double k = 1e4;
         double mass = 70;
         double v0 = -0.5 * r0 * gamma / mass;
         Simulation simulation = new Simulation(r0, v0, k, gamma, mass);
