@@ -1,4 +1,3 @@
-from cProfile import label
 import enum
 import math
 import os
@@ -98,8 +97,6 @@ def plot_end_state_percentages_vs_velocity(absorbed, escaped_left, escaped_right
     legends = ["Absorbidos", "Escapados por la izquierda", "Escapados por la derecha",
                "Escapados por la parte inferior", "Escapados por la parte superior"]
 
-
-
     ind = np.arange(len(velocities)) + 5000
     ind = ind * 1.5
     width = 0.175
@@ -123,43 +120,45 @@ def plot_end_state_percentages_vs_velocity(absorbed, escaped_left, escaped_right
 
 
 def plot_trajectory_vs_velocity(trajectories, velocities, stdev_trajectories):
-    plt.errorbar(velocities, trajectories, ls="none",
-                 yerr=stdev_trajectories, ecolor='blue', marker='o', color="red", elinewidth=0.5, capsize=5)
-    plt.xlabel('Velocidad [m/s]')
-    plt.ylabel('Trajectoria promedio [m]')
+
+    fig, ax = plt.subplots()
+
+    ax.yaxis.set_major_formatter(
+        plt.FuncFormatter(sci_notation))
+
+    ax.errorbar(velocities, trajectories, ls="none",
+                yerr=stdev_trajectories, ecolor='blue', marker='o', color="red", elinewidth=0.5, capsize=5)
+    plt.xlabel('Velocidad [m/s]', fontsize=25)
+    plt.ylabel('Trayectoria promedio [m]', fontsize=25)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.legend(['Trayectoria promedio'], fontsize=25)
     plt.show()
 
 
 def plot_absorbed_trajectories_histogram(absorbed_trajectories_in_velocity, velocities):
 
-    number_of_bins = 5000
-
+    number_of_bins = 7
+    fig, ax = plt.subplots()
     for absorbed_trajectory in absorbed_trajectories_in_velocity:
-        bin_width = max(absorbed_trajectory) / number_of_bins
-        bins = np.empty(number_of_bins)
-        bins.fill(0)
-        for trajectory in absorbed_trajectory:
-            bin_index = int(trajectory / bin_width)
-            bin_index = min(bin_index, number_of_bins-1)
-            bins[bin_index] += 1
+        absorbed_trajectory = np.array(
+            absorbed_trajectory)
+        hist, bins = np.histogram(
+            absorbed_trajectory, bins='sturges', density=True)
+        plt.plot(bins[1:], hist, '-')
+        print(len(bins))
+    ax.xaxis.set_major_formatter(
+        plt.FuncFormatter(sci_notation))
+    ax.yaxis.set_major_formatter(
+        plt.FuncFormatter(sci_notation))
 
-        density_bins = bins / \
-            (len(absorbed_trajectories_in_velocity) * bin_width)
-
-        x = np.linspace(0, max(absorbed_trajectory), number_of_bins)
-
-        plt.plot(x, density_bins)
-
-        fig, ax = plt.subplots()
-
-        ax.xaxis.set_major_formatter(
-            plt.FuncFormatter(sci_notation))
-        ax.yaxis.set_major_formatter(
-            plt.FuncFormatter(sci_notation))
-
-    plt.xlabel('Trajectoria Absorbidos [m]')
-    plt.ylabel('Densidad de probabilidad de absorcion')
-    plt.legend([f"$V_0$ = {int(velocity)} [m/s]" for velocity in velocities])
+    plt.xlabel(
+        'Trayectoria de partículas absorbidas [m]', fontdict={'size': 25})
+    plt.ylabel('Densidad de probabilidad de absorción', fontdict={'size': 25})
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
+    plt.legend(
+        [f"$V_0$ = {int(velocity)} [m/s]" for velocity in velocities], fontsize=25)
     plt.show()
 
 
@@ -277,12 +276,12 @@ def main():
     #     mean_trajectories, velocities, stdev_trajectories)
 
     # 2.3
-    plot_end_state_percentages_vs_velocity(
-        absorbed, escaped_left, escaped_right, escaped_bottom, escaped_top, velocities)
+    # plot_end_state_percentages_vs_velocity(
+    #     absorbed, escaped_left, escaped_right, escaped_bottom, escaped_top, velocities)
 
     # 2.4
-    # plot_absorbed_trajectories_histogram(
-    #     absorbed_trajectories_by_velocity, velocities)
+    plot_absorbed_trajectories_histogram(
+        absorbed_trajectories_by_velocity, velocities)
 
 
 if __name__ == '__main__':
